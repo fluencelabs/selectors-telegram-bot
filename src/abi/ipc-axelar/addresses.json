@@ -1,0 +1,10 @@
+{
+  "dest": {
+    "network": "FILECOIN",
+    "token_handler": "0xEe6F08D04AF45549Db65d8f5EaBdC6E8C0FE4A1d"
+  },
+  "src": {
+    "network": "ETHEREUM",
+    "token_sender": "0x08839D8E72F9DD23cdaAc99055e9d9697bf7010e"
+  }
+}
