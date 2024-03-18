@@ -14,6 +14,7 @@ export const startBot = async () => {
   // on message
   bot.on("message", (ctx) => {
     if ((ctx.message as any).text) {
+      console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
       ctx.reply(checkMessage((ctx.message as any).text));
     }
   });
