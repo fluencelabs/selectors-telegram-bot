@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { decodeAbiParameters, keccak256, stringToHex } from 'viem';
+import { decodeAbiParameters, keccak256, parseAbi, stringToHex } from 'viem';
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
@@ -26,6 +26,36 @@ const loadFilesRecursive = async (dir: string): Promise<string[]> => {
   return abiFiles;
 };
 
+const add = (
+  type: 'function' | 'event' | 'error',
+  selector: string,
+  signature: string,
+  abiItem: Record<string, any>,
+) => {
+  if (type === 'function') {
+    selectorToAbi.set(selector, abiItem);
+    functionSelectors.set(selector, signature);
+  }
+  if (type === 'event') {
+    eventSelectors.set(selector, signature);
+    selectorToAbi.set(selector, abiItem);
+  }
+  if (type === 'error') {
+    errorSelectors.set(selector, signature);
+    selectorToAbi.set(selector, abiItem);
+  }
+}
+
+const loadPredefined = async () => {
+  const errorsData = await fs.promises.readFile(path.join(__dirname, 'predefined', 'errors.json'), 'utf-8');
+  const errors = JSON.parse(errorsData);
+  for (const selector of Object.keys(errors)) {
+    const signature = errors[selector]!;
+    const abiItem = parseAbi(['error ' + signature])[0];
+    add('error', selector, signature, abiItem);
+  }
+}
+
 const tupleToComponentsRecursive = (tuple: any): string => {
   const components = tuple.components.map((component: any) => {
     if (component.components) {
@@ -37,6 +67,7 @@ const tupleToComponentsRecursive = (tuple: any): string => {
 }
 
 export const loadFiles = async () => {
+  await loadPredefined();
   const dir = path.join(__dirname, 'abi');
   const files = await loadFilesRecursive(dir);
   const abiFiles = files.filter((file) => file.endsWith('.json'));
@@ -70,25 +101,19 @@ export const loadFiles = async () => {
       }).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature)).slice(0, 10);
-      selectorToAbi.set(selector, abiItem);
-      functionSelectors.set(selector, signature);
-      if (name === "newSubnetActor") {
-        console.log(selector, signature)
-      }
+      add('function', selector, signature, abiItem);
     } else if (type === 'event') {
       const { name, inputs } = abiItem;
       const types = inputs.map((input: any) => input.type).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature));
-      eventSelectors.set(selector, signature);
-      selectorToAbi.set(selector, abiItem);
+      add('event', selector, signature, abiItem);
     } else if (type === 'error') {
       const { name, inputs } = abiItem;
       const types = inputs.map((input: any) => input.type).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature)).slice(0, 10);
-      errorSelectors.set(selector, signature);
-      selectorToAbi.set(selector, abiItem);
+      add('error', selector, signature, abiItem);
     } else if (type === 'constructor') {
 
     } else if (type === 'fallback') {
@@ -132,6 +157,15 @@ export const checkMessage = (message: string) => {
         const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
         // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
         return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+      }
+      if (errorSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+        const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+        const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+        const data: any[] = decodeAbiParameters(inputs, slicedMessage);
+        const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+        const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+        // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
+        return 'error ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
       }
     } catch (e: any) {
       return e.message;
