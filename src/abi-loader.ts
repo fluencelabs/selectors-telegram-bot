@@ -119,15 +119,19 @@ export const checkMessage = (message: string) => {
   } else if (message.length === 66) {
     return eventSelectors.get(message) ?? 'Unknown event';
   } else {
-    const possibleSelector = message.slice(0, 10);
-    if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
-      const inputs = selectorToAbi.get(possibleSelector)!.inputs;
-      const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
-      const data: any[] = decodeAbiParameters(inputs, slicedMessage);
-      const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
-      const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-      // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
-      return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+    try {
+      const possibleSelector = message.slice(0, 10);
+      if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+        const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+        const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+        const data: any[] = decodeAbiParameters(inputs, slicedMessage);
+        const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+        const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+        // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
+        return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+      }
+    } catch (e: any) {
+      return e.message;
     }
   }
   return 'Unknown data';
