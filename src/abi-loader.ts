@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { keccak256, stringToHex } from 'viem';
+import { decodeAbiParameters, decodeFunctionData, keccak256, parseAbi, stringToHex } from 'viem';
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
 export const errorSelectors: Map<string, string> = new Map();
+export const selectorToAbi: Map<string, Record<string, any>> = new Map();
 
 const loadFilesRecursive = async (dir: string): Promise<string[]> => {
   const files = await fs.promises.readdir(dir);
@@ -69,6 +70,7 @@ export const loadFiles = async () => {
       }).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature)).slice(0, 10);
+      selectorToAbi.set(selector, abiItem);
       functionSelectors.set(selector, signature);
     } else if (type === 'event') {
       const { name, inputs } = abiItem;
@@ -76,12 +78,14 @@ export const loadFiles = async () => {
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature));
       eventSelectors.set(selector, signature);
+      selectorToAbi.set(selector, abiItem);
     } else if (type === 'error') {
       const { name, inputs } = abiItem;
       const types = inputs.map((input: any) => input.type).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature)).slice(0, 10);
       errorSelectors.set(selector, signature);
+      selectorToAbi.set(selector, abiItem);
     } else if (type === 'constructor') {
 
     } else if (type === 'fallback') {
@@ -112,9 +116,19 @@ export const checkMessage = (message: string) => {
       return 'error ' + errorSelectors.get(message);
     }
     return 'Unknown function or custom error';
-  }
-  if (message.length === 66) {
+  } else if (message.length === 66) {
     return eventSelectors.get(message) ?? 'Unknown event';
+  } else {
+    const possibleSelector = message.slice(0, 10);
+    if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+      const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+      const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+      const data = decodeAbiParameters(inputs, slicedMessage);
+      const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+      const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+      // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
+      return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+    }
   }
   return 'Unknown message format';
 }
