@@ -130,5 +130,5 @@ export const checkMessage = (message: string) => {
       return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
     }
   }
-  return 'Unknown message format';
+  return 'Unknown data';
 }
