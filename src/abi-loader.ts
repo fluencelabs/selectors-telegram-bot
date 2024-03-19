@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { decodeAbiParameters, decodeFunctionData, keccak256, parseAbi, stringToHex } from 'viem';
+import { decodeAbiParameters, keccak256, stringToHex } from 'viem';
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
@@ -123,7 +123,7 @@ export const checkMessage = (message: string) => {
     if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
       const inputs = selectorToAbi.get(possibleSelector)!.inputs;
       const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
-      const data = decodeAbiParameters(inputs, slicedMessage);
+      const data: any[] = decodeAbiParameters(inputs, slicedMessage);
       const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
       const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
       // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
