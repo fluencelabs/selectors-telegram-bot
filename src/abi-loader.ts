@@ -29,7 +29,7 @@ const loadFilesRecursive = async (dir: string): Promise<string[]> => {
 const tupleToComponentsRecursive = (tuple: any): string => {
   const components = tuple.components.map((component: any) => {
     if (component.components) {
-      return tupleToComponentsRecursive(component);
+      return "(" + tupleToComponentsRecursive(component) + ")";
     }
     return component.type;
   });
@@ -52,7 +52,7 @@ export const loadFiles = async () => {
       }
       return [];
     }
-  ));
+    ));
   for (const abiItem of abi.flat()) {
     // if (!Array.isArray(abiItem)) {
     //   throw new Error('Invalid ABI');
@@ -72,6 +72,9 @@ export const loadFiles = async () => {
       selector = keccak256(stringToHex(signature)).slice(0, 10);
       selectorToAbi.set(selector, abiItem);
       functionSelectors.set(selector, signature);
+      if (name === "newSubnetActor") {
+        console.log(selector, signature)
+      }
     } else if (type === 'event') {
       const { name, inputs } = abiItem;
       const types = inputs.map((input: any) => input.type).join(',');
