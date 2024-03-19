@@ -155,7 +155,6 @@ export const checkMessage = (message: string) => {
         const data: any[] = decodeAbiParameters(inputs, slicedMessage);
         const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
         const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
         return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
       }
       if (errorSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
@@ -164,8 +163,7 @@ export const checkMessage = (message: string) => {
         const data: any[] = decodeAbiParameters(inputs, slicedMessage);
         const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
         const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        // console.log(parseAbi(['function ' + functionSelectors.get(possibleSelector)]))
-        return 'error ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+        return 'error ' + errorSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
       }
     } catch (e: any) {
       return e.message;
