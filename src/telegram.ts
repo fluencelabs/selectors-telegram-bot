@@ -6,13 +6,6 @@ const bot = new Telegraf(BOT_TOKEN);
 
 export const startBot = async () => {
   bot.launch();
-  // on message
-  bot.on("message", (ctx) => {
-    if ((ctx.message as any).text) {
-      console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
-      ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
-    }
-  });
 
   bot.start((ctx) => {
     ctx.reply(`
@@ -29,5 +22,13 @@ export const startBot = async () => {
       Send me a message with calldata to get the function signature and decoded calldata.
       Example: <code>0x0af76b8f0000000000000000000000003d441ee4a0b65d8e3fe939b7b632152837be73fe0000000000000000000000000000000000000000000000056bc75e2d63100000</code>
     `);
-  })
+  });
+
+  // on message
+  bot.on("message", (ctx) => {
+    if ((ctx.message as any).text) {
+      console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
+      ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
+    }
+  });
 }
