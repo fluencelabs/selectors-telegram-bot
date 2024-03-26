@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { decodeAbiParameters, keccak256, parseAbi, stringToHex } from 'viem';
+import { addressByBase64PrivateOrPublicKey, addressByHexPrivateOrPublicKey } from './address-utils';
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
@@ -132,23 +133,32 @@ export const loadFiles = async () => {
 }
 
 export const checkMessage = (message: string) => {
+  let prefixForAddressCheck = "";
+  try {
+    const addressFromPrivateOrPublicKey = addressByHexPrivateOrPublicKey(message);
+    prefixForAddressCheck = "I could generate the address: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+  } catch { }
+  try {
+    const addressFromPrivateOrPublicKey = addressByBase64PrivateOrPublicKey(message);
+    prefixForAddressCheck = "I could generate the address: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+  } catch { }
   if (!message.startsWith('0x')) {
     message = '0x' + message;
   }
   message = message.toLowerCase();
   if (message.length === 10) {
     if (functionSelectors.has(message)) {
-      return 'function ' + functionSelectors.get(message);
+      return prefixForAddressCheck + 'function ' + functionSelectors.get(message);
     }
     if (errorSelectors.has(message)) {
-      return 'error ' + errorSelectors.get(message);
+      return prefixForAddressCheck + 'error ' + errorSelectors.get(message);
     }
-    return 'Unknown function or custom error';
+    return prefixForAddressCheck || 'Unknown function or custom error';
   } else if (message.length === 66) {
     if (eventSelectors.has(message)) {
-      return 'event ' + eventSelectors.get(message);
+      return prefixForAddressCheck + 'event ' + eventSelectors.get(message);
     }
-    return 'Unknown event';
+    return prefixForAddressCheck || 'Unknown event';
   } else {
     try {
       const possibleSelector = message.slice(0, 10);
@@ -158,7 +168,7 @@ export const checkMessage = (message: string) => {
         const data: any[] = decodeAbiParameters(inputs, slicedMessage);
         const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
         const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        return 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+        return prefixForAddressCheck + 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
       }
       if (errorSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
         const inputs = selectorToAbi.get(possibleSelector)!.inputs;
@@ -166,11 +176,11 @@ export const checkMessage = (message: string) => {
         const data: any[] = decodeAbiParameters(inputs, slicedMessage);
         const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
         const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        return 'error ' + errorSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+        return prefixForAddressCheck + 'error ' + errorSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
       }
     } catch (e: any) {
-      return e.message;
+      return prefixForAddressCheck + e.message;
     }
   }
-  return 'Unknown data';
+  return prefixForAddressCheck || 'Unknown data';
 }
