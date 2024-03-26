@@ -136,15 +136,15 @@ export const checkMessage = (message: string) => {
   let prefixForAddressCheck = "";
   try {
     const addressFromPrivateOrPublicKey = addressByHexPrivateOrPublicKey(message);
-    prefixForAddressCheck = "I could generate the address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
   } catch { }
   try {
     const addressFromPrivateOrPublicKey = addressByHexPrivateOrPublicKey("0x" + message);
-    prefixForAddressCheck = "I could generate the address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
   } catch { }
   try {
     const addressFromPrivateOrPublicKey = addressByBase64PrivateOrPublicKey(message);
-    prefixForAddressCheck = "I could generate the address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
   } catch { }
   if (!message.startsWith('0x')) {
     message = '0x' + message;
