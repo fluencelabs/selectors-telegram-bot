@@ -145,7 +145,10 @@ export const checkMessage = (message: string) => {
     }
     return 'Unknown function or custom error';
   } else if (message.length === 66) {
-    return eventSelectors.get(message) ?? 'Unknown event';
+    if (eventSelectors.has(message)) {
+      return 'event ' + eventSelectors.get(message);
+    }
+    return 'Unknown event';
   } else {
     try {
       const possibleSelector = message.slice(0, 10);
