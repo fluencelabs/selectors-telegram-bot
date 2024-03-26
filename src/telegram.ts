@@ -23,6 +23,9 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
 
 ℹ️ Send me a message with calldata to get the function signature and decoded calldata.
 <code>0x0af76b8f0000000000000000000000003d441ee4a0b65d8e3fe939b7b632152837be73fe0000000000000000000000000000000000000000000000056bc75e2d63100000</code>
+
+ℹ️ Send me private or public key in any format (hex like in EVM or base64 from IPC) to get the address.
+<code>Amg7rBBsVeGC/Ufd6gsgD8Jqc7nHV8epXKFmu1XORo2/</code>
     `, { parse_mode: "HTML" });
   });
 
