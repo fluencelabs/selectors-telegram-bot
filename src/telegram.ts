@@ -30,10 +30,12 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
   });
 
   // on message
-  bot.on("message", (ctx) => {
+  bot.on("message", async (ctx) => {
     if ((ctx.message as any).text) {
       console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
-      ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
+      try {
+        await ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
+      } catch {} 
     }
   });
 }
