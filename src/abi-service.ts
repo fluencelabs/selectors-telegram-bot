@@ -55,6 +55,7 @@ const loadPredefined = async () => {
     const abiItem = parseAbi(['error ' + signature])[0];
     add('error', selector, signature, abiItem);
   }
+  // TODO predefined methods and events
 }
 
 const tupleToComponentsRecursive = (tuple: any): string => {
@@ -86,9 +87,6 @@ export const loadFiles = async () => {
     }
     ));
   for (const abiItem of abi.flat()) {
-    // if (!Array.isArray(abiItem)) {
-    //   throw new Error('Invalid ABI');
-    // }
     const { type } = abiItem;
     let selector = '';
     let signature = '';

@@ -1,5 +1,5 @@
-import { Context, Telegraf } from "telegraf";
-import { checkMessage } from "./abi-loader";
+import { Telegraf } from "telegraf";
+import { checkMessage } from "./abi-service";
 import { BOT_TOKEN } from "./BOT_TOKEN";
 
 const bot = new Telegraf(BOT_TOKEN);
@@ -35,7 +35,7 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
       console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
       try {
         await ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
-      } catch {} 
+      } catch { }
     }
   });
 }
