@@ -1,7 +1,7 @@
 Telegram bot: [@fluence_selectors_bot](https://t.me/fluence_selectors_bot)
 
 ## Run
-`npm run dev`
+Prepare .env according to [.example.env](.example.env) and run `npm run dev`
 
 ## Add ABI
 There are Foundry artifacts in `src/abi` directory. You can add (just copy files there), the bot recursively gets all ABI data

@@ -1,10 +1,9 @@
 import { Telegraf } from "telegraf";
 import { checkMessage } from "./abi-service";
-import { BOT_TOKEN } from "./BOT_TOKEN";
 
-const bot = new Telegraf(BOT_TOKEN);
-
-export const startBot = async () => {
+export const startBot = async (token: string) => {
+  console.log('Starting with token...', token)
+  const bot = new Telegraf(token);
   bot.launch();
 
   bot.start((ctx) => {
