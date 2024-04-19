@@ -1,5 +1,5 @@
 import { Telegraf } from "telegraf";
-import { checkMessage } from "./abi-service";
+import { applySelectors } from "./abi-service";
 
 export const startBot = async (token: string) => {
   console.log('Starting with token...', token)
@@ -33,7 +33,7 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
     if ((ctx.message as any).text) {
       console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
       try {
-        await ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
+        await ctx.reply(applySelectors((ctx.message as any).text), { parse_mode: "HTML" });
       } catch { }
     }
   });
