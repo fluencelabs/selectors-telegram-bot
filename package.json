@@ -16,6 +16,8 @@
     "colors": "^1.4.0",
     "dotenv": "^16.4.5",
     "ethers": "^6.11.1",
+    "ipfs-http-client": "^50.1.2",
+    "multiformats": "^9.9.0",
     "telegraf": "^4.16.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2",
