@@ -8,8 +8,16 @@ export const startBot = async (token: string) => {
 
   bot.start((ctx) => {
     ctx.reply(`
-Welcome to the Fluence ABI Bot!
-The bot is loaded with Fluence and IPC ABI data and can help you with function signatures, event signatures, error signatures, and decoding calldata.
+Bot tries to parse incoming text via prepared selectors and decode them. Selectors are related to: 
+ 
+- Ethereum features (addresses from private keys, other type of keys (Filecoin))
+- Fluence contracts (function signatures, event signatures, error signatures, and decoding calldata)
+- IPC contracts (function signatures, event signatures, error signatures, and decoding calldata)
+- Fluence specific objects stored in Fluence contracts and Subgraph (e.g. PeerIds, CIDs, etc.)
+
+To interact with the bot you send your message and await that the message could be parsed via all possible selectors for you.
+
+Examples of messages:
 
 ℹ️ Send me a message with a function selector to get the function signature.
 <code>0xa9059cbb</code>
@@ -25,7 +33,13 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
 
 ℹ️ Send me private or public key in any format (hex like in EVM or base64 from IPC) to get the address.
 <code>Amg7rBBsVeGC/Ufd6gsgD8Jqc7nHV8epXKFmu1XORo2/</code>
-    `, { parse_mode: "HTML" });
+
+ℹ️ Send me CIDv1 to get CID in Fluence Subgraph format (yes we have special <a href="https://github.com/fluencelabs/deal/blob/main/subgraph/src/mappings/utils.ts#L37">one</a>).
+<code>bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce</code>
+
+ℹ️ Send me PeerId (base58) to get PeerId in hex format (the format that is used in Fluence contracts as well).
+<code>12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb</code>
+    `, { parse_mode: "HTML", link_preview_options: { is_disabled: true }});
   });
 
   // on message
