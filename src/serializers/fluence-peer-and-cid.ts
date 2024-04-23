@@ -9,6 +9,8 @@ import { base32 } from "multiformats/bases/base32";
 const PEER_BYTE58_PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const CID_PREFIX_LENGTH = 4;
 const BASE_58_PREFIX = "z";
+const BYTES32_HEX_LENGTH = 66
+const BYTES4_HEX_LENGTH = 4
 
 function _uint8ArrayToContractHexFormat(arr: Uint8Array): string {
   return `0x${Buffer.from(arr).toString("hex")}`
@@ -25,7 +27,11 @@ export function peerIdByte58ToUint8Array(peerId: string) {
 
 // Serialize PeerId bytes58 to contract hex format.
 export function peerIdByte58toContractHex(peerId: string) {
-  return _uint8ArrayToContractHexFormat(peerIdByte58ToUint8Array(peerId));
+  const result = _uint8ArrayToContractHexFormat(peerIdByte58ToUint8Array(peerId));
+  if (result.length != BYTES32_HEX_LENGTH) {
+    throw new Error("[peerIdByte58toContractHex] Could not parse PeerId to bytes32.")
+  }
+  return result
 }
 
 // Serialize PeerId from contract hex format to bytes58.
@@ -35,13 +41,19 @@ export function peerIdContractHexToBase58(peerIdHex: string) {
     .slice(BASE_58_PREFIX.length);
 }
 
+// It mirrors the flow as in Subgraph (Indexer) exists (concat hexes without leading 0x).
 export function cidBase32ToIndexerHex(cid: string): string {
   // Changed from ts-client version coz of ipfs-http-client@50.1.2.
   const id = new CID(cid).bytes;
   const prefixes = Buffer.from(id.slice(0, CID_PREFIX_LENGTH)).toString("hex");
   const hash = Buffer.from(id.slice(CID_PREFIX_LENGTH)).toString("hex");
+  const result = `${prefixes}${hash}`
+  // HEX + HEX without leading 0x in both parts.
+  if (result.length != (BYTES32_HEX_LENGTH + BYTES4_HEX_LENGTH - 4)) {
+    throw new Error("[cidBase32ToIndexerHex] Could not parse CID to bytes32.")
+  }
 
-  return `${prefixes}${hash}`
+  return result
 }
 
 // In Subgraph CID is stored as contacted "hex of prefix" with "hex of hash"
