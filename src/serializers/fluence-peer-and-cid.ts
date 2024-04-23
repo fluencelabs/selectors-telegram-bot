@@ -10,7 +10,7 @@ const PEER_BYTE58_PREFIX = new Uint8Array([0, 36, 8, 1, 18, 32]);
 const CID_PREFIX_LENGTH = 4;
 const BASE_58_PREFIX = "z";
 const BYTES32_HEX_LENGTH = 66
-const BYTES4_HEX_LENGTH = 4
+const INDEXER_CONCATTED_CID_HEX_LENGTH = 72
 
 function _uint8ArrayToContractHexFormat(arr: Uint8Array): string {
   return `0x${Buffer.from(arr).toString("hex")}`
@@ -49,7 +49,7 @@ export function cidBase32ToIndexerHex(cid: string): string {
   const hash = Buffer.from(id.slice(CID_PREFIX_LENGTH)).toString("hex");
   const result = `${prefixes}${hash}`
   // HEX + HEX without leading 0x in both parts.
-  if (result.length != (BYTES32_HEX_LENGTH + BYTES4_HEX_LENGTH - 4)) {
+  if (result.length != INDEXER_CONCATTED_CID_HEX_LENGTH) {
     throw new Error("[cidBase32ToIndexerHex] Could not parse CID to bytes32.")
   }
 

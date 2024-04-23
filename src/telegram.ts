@@ -2,7 +2,6 @@ import { Telegraf } from "telegraf";
 import { applySelectors } from "./abi-service";
 
 export const startBot = async (token: string) => {
-  console.log('Starting with token...', token)
   const bot = new Telegraf(token);
   bot.launch();
 

@@ -175,11 +175,11 @@ const _composeDescriptionByObjectSignatureReply = (message: string) => {
 const _composePeerIdReply = (message: string) => {
   const PEER_ID_BASE58_NOT_SHORTER_THAN = 10;
   try {
-    return peerIdByte58toContractHex(message)
+    return "I could format a peer ID to contract format from this base58:\n<code>" + peerIdByte58toContractHex(message) + "</code>";
   } catch { }
   try {
     const peerBase58 = peerIdContractHexToBase58(message)
-    if (peerBase58.length < PEER_ID_BASE58_NOT_SHORTER_THAN) {
+    if (peerBase58.length >= PEER_ID_BASE58_NOT_SHORTER_THAN) {
       return "I could format a peer ID to base58 format from contract hex:\n<code>" + peerBase58 + "</code>";
     }
   } catch { }
@@ -189,7 +189,7 @@ const _composePeerIdReply = (message: string) => {
 const _composeCidReply = (message: string) => {
   const CID_NOT_SHORTER_THAN = 10;
   try {
-    return cidBase32ToIndexerHex(message)
+    return "I could format a CID to subgprah hex format from base32:\n<code>" + cidBase32ToIndexerHex(message) + "</code>";
   } catch { }
   try {
     const cidBase32 = cidIndexerHexToCIDBase32(message)
