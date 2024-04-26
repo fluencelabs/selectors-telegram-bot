@@ -1,7 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 import { decodeAbiParameters, keccak256, parseAbi, stringToHex } from 'viem';
-import { addressByBase64PrivateOrPublicKey, addressByHexPrivateOrPublicKey } from './address-utils';
+import { addressByBase64PrivateOrPublicKey, addressByHexPrivateOrPublicKey } from './serializers/address-utils';
+import {
+  cidBase32ToIndexerHex, cidIndexerHexToCIDBase32,
+  peerIdByte58toContractHex,
+  peerIdContractHexToBase58
+} from "./serializers/fluence-peer-and-cid";
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
@@ -130,59 +135,111 @@ export const loadFiles = async () => {
   console.log('Loaded', errorSelectors.size, 'errors');
 }
 
-export const checkMessage = (message: string) => {
-  let prefixForAddressCheck = "";
+const _composeDeriveAddressReply = (message: string) => {
+  let composedReplay = "";
   try {
     const addressFromPrivateOrPublicKey = addressByHexPrivateOrPublicKey(message);
-    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    composedReplay = "I could generate an address from this private or public key:\n<code>" + addressFromPrivateOrPublicKey + "</code>";
   } catch { }
   try {
     const addressFromPrivateOrPublicKey = addressByHexPrivateOrPublicKey("0x" + message);
-    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    composedReplay = "I could generate an address from this private or public key:\n<code>" + addressFromPrivateOrPublicKey + "</code>";
   } catch { }
   try {
     const addressFromPrivateOrPublicKey = addressByBase64PrivateOrPublicKey(message);
-    prefixForAddressCheck = "I could generate an address from this private or public key: <code>" + addressFromPrivateOrPublicKey + "</code>\n\n";
+    composedReplay = "I could generate an address from this private or public key:\n<code>" + addressFromPrivateOrPublicKey + "</code>";
   } catch { }
+  return composedReplay;
+}
+
+const _composeDescriptionByObjectSignatureReply = (message: string) => {
+  if (message.length !== 10 && message.length !== 66) {
+    return
+  }
+  if (message.length === 10) {
+    if (functionSelectors.has(message)) {
+      return 'function ' + functionSelectors.get(message);
+    }
+    if (errorSelectors.has(message)) {
+      return 'error ' + errorSelectors.get(message);
+    }
+    return 'Unknown function or custom error';
+  } else {
+    if (eventSelectors.has(message)) {
+      return 'event ' + eventSelectors.get(message);
+    }
+    return 'Unknown event';
+  }
+}
+
+const _composePeerIdReply = (message: string) => {
+  const PEER_ID_BASE58_NOT_SHORTER_THAN = 10;
+  try {
+    return "I could format a peer ID to contract format from this base58:\n<code>" + peerIdByte58toContractHex(message) + "</code>";
+  } catch { }
+  try {
+    const peerBase58 = peerIdContractHexToBase58(message)
+    if (peerBase58.length >= PEER_ID_BASE58_NOT_SHORTER_THAN) {
+      return "I could format a peer ID to base58 format from contract hex:\n<code>" + peerBase58 + "</code>";
+    }
+  } catch { }
+  return ""
+}
+
+const _composeCidReply = (message: string) => {
+  const CID_NOT_SHORTER_THAN = 10;
+  try {
+    return "I could format a CID to subgprah hex format from base32:\n<code>" + cidBase32ToIndexerHex(message) + "</code>";
+  } catch { }
+  try {
+    const cidBase32 = cidIndexerHexToCIDBase32(message)
+    if (cidBase32.length >= CID_NOT_SHORTER_THAN) {
+    return "I could format a CID to base32 format (actual CID) from subgraph:\n<code>" + cidBase32 + "</code>";
+    }
+  } catch { }
+  return ""
+}
+
+export const applySelectors = (message: string) => {
+  const derivedAddressReply = _composeDeriveAddressReply(message);
+  const composedPeerIdReply = _composePeerIdReply(message);
+  const composeCidReply = _composeCidReply(message);
+  const _replies = [derivedAddressReply, composedPeerIdReply, composeCidReply].filter((reply) => reply !== "");
+  let composedReplies = ""
+  if (_replies.length > 0) {
+      composedReplies = _replies.join("\n\n");
+      composedReplies += "\n\n";
+  }
+
   if (!message.startsWith('0x')) {
     message = '0x' + message;
   }
   message = message.toLowerCase();
-  if (message.length === 10) {
-    if (functionSelectors.has(message)) {
-      return prefixForAddressCheck + 'function ' + functionSelectors.get(message);
-    }
-    if (errorSelectors.has(message)) {
-      return prefixForAddressCheck + 'error ' + errorSelectors.get(message);
-    }
-    return prefixForAddressCheck || 'Unknown function or custom error';
-  } else if (message.length === 66) {
-    if (eventSelectors.has(message)) {
-      return prefixForAddressCheck + 'event ' + eventSelectors.get(message);
-    }
-    return prefixForAddressCheck || 'Unknown event';
-  } else {
-    try {
-      const possibleSelector = message.slice(0, 10);
-      if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
-        const inputs = selectorToAbi.get(possibleSelector)!.inputs;
-        const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
-        const data: any[] = decodeAbiParameters(inputs, slicedMessage);
-        const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
-        const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        return prefixForAddressCheck + 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
-      }
-      if (errorSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
-        const inputs = selectorToAbi.get(possibleSelector)!.inputs;
-        const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
-        const data: any[] = decodeAbiParameters(inputs, slicedMessage);
-        const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
-        const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-        return prefixForAddressCheck + 'error ' + errorSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
-      }
-    } catch (e: any) {
-      return prefixForAddressCheck + e.message;
-    }
+  const composeDescriptionByObjectSignatureReply = _composeDescriptionByObjectSignatureReply(message);
+  if (composeDescriptionByObjectSignatureReply) {
+    return composedReplies + composeDescriptionByObjectSignatureReply;
   }
-  return prefixForAddressCheck || 'Unknown data';
+  // TODO: refactor to separate replies more from here.
+  try {
+    const possibleSelector = message.slice(0, 10);
+    if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+      const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+      const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+      const data: any[] = decodeAbiParameters(inputs, slicedMessage);
+      const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+      const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+      return composedReplies + 'function ' + functionSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+    }
+    if (errorSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+      const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+      const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+      const data: any[] = decodeAbiParameters(inputs, slicedMessage);
+      const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+      const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+      return composedReplies + 'error ' + errorSelectors.get(possibleSelector) + '\n\n<code>' + prettified + "</code>";
+    }
+  } catch (e: any) {
+    return composedReplies + e.message;
+  }
+  return composedReplies || 'Unknown data';
 }

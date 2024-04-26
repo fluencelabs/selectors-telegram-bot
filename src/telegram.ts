@@ -1,16 +1,22 @@
 import { Telegraf } from "telegraf";
-import { checkMessage } from "./abi-service";
-import { BOT_TOKEN } from "./BOT_TOKEN";
+import { applySelectors } from "./abi-service";
 
-const bot = new Telegraf(BOT_TOKEN);
-
-export const startBot = async () => {
+export const startBot = async (token: string) => {
+  const bot = new Telegraf(token);
   bot.launch();
 
   bot.start((ctx) => {
     ctx.reply(`
-Welcome to the Fluence ABI Bot!
-The bot is loaded with Fluence and IPC ABI data and can help you with function signatures, event signatures, error signatures, and decoding calldata.
+Bot tries to parse incoming text via prepared selectors and decode them. Selectors are related to: 
+ 
+- Ethereum features (addresses from private keys, other type of keys (Filecoin))
+- Fluence contracts (function signatures, event signatures, error signatures, and decoding calldata)
+- IPC contracts (function signatures, event signatures, error signatures, and decoding calldata)
+- Fluence specific objects stored in Fluence contracts and Subgraph (e.g. PeerIds, CIDs, etc.)
+
+To interact with the bot you send your message and await that the message could be parsed via all possible selectors for you.
+
+Examples of messages:
 
 ℹ️ Send me a message with a function selector to get the function signature.
 <code>0xa9059cbb</code>
@@ -26,7 +32,13 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
 
 ℹ️ Send me private or public key in any format (hex like in EVM or base64 from IPC) to get the address.
 <code>Amg7rBBsVeGC/Ufd6gsgD8Jqc7nHV8epXKFmu1XORo2/</code>
-    `, { parse_mode: "HTML" });
+
+ℹ️ Send me CIDv1 to get CID in Fluence Subgraph format (yes we have special <a href="https://github.com/fluencelabs/deal/blob/main/subgraph/src/mappings/utils.ts#L37">one</a>).
+<code>bafkreids22lgia5bqs63uigw4mqwhsoxvtnkpfqxqy5uwyyerrldsr32ce</code>
+
+ℹ️ Send me PeerId (base58) to get PeerId in hex format (the format that is used in Fluence contracts as well).
+<code>12D3KooWCKCeqLPSgMnDjyFsJuWqREDtKNHx1JEBiwaMXhCLNTRb</code>
+    `, { parse_mode: "HTML", link_preview_options: { is_disabled: true }});
   });
 
   // on message
@@ -34,7 +46,7 @@ The bot is loaded with Fluence and IPC ABI data and can help you with function s
     if ((ctx.message as any).text) {
       console.log("Message", ctx.message.from?.username ?? ctx.message.from.first_name, (ctx.message as any).text);
       try {
-        await ctx.reply(checkMessage((ctx.message as any).text), { parse_mode: "HTML" });
+        await ctx.reply(applySelectors((ctx.message as any).text), { parse_mode: "HTML" });
       } catch { }
     }
   });
