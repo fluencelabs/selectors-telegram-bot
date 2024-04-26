@@ -36,6 +36,9 @@ export function peerIdByte58toContractHex(peerId: string) {
 
 // Serialize PeerId from contract hex format to bytes58.
 export function peerIdContractHexToBase58(peerIdHex: string) {
+  if (peerIdHex.length != BYTES32_HEX_LENGTH) {
+    throw new Error("[peerIdContractHexToBase58] Assertation Error: PeerId should be BYTES32_HEX_LENGTH bytes long.")
+  }
   return base58btc
     .encode(Buffer.concat([PEER_BYTE58_PREFIX, Buffer.from(peerIdHex.slice(2), "hex")]))
     .slice(BASE_58_PREFIX.length);
@@ -60,6 +63,9 @@ export function cidBase32ToIndexerHex(cid: string): string {
 //  (0x is replaced with ''). Thus, to serialize it to base32 we merely need
 //  to encode the string to base32.
 export function cidIndexerHexToCIDBase32(cid: string): string {
+  if (cid.length != INDEXER_CONCATTED_CID_HEX_LENGTH) {
+    throw new Error("[cidIndexerHexToCIDBase32] Assertation Error: CID should be 7INDEXER_CONCATTED_CID_HEX_LENGTH bytes long.")
+  }
   // eslint-disable-next-line import/extensions
   return base32.encode(new Uint8Array(Buffer.from(cid, "hex")));
 }
