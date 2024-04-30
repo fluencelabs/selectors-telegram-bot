@@ -1,6 +1,6 @@
 {
   "name": "flbot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "main": "lib/package.js",
   "types": "lib/package.d.ts",

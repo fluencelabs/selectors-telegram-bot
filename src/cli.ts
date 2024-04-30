@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { processMessage, stripTags } from './abi-service';
+import { loadFiles, processMessage, stripTags } from './abi-service';
 import { intro } from './intro';
 
 const commandArgs = process.argv.slice(2);
@@ -10,7 +10,11 @@ if (message.trim() === '') {
   process.exit(0);
 }
 
-console.log({ message });
-console.log(
-  stripTags(processMessage(message)),
-);
+const run = async () => {
+  await loadFiles();
+  console.log(
+    stripTags(processMessage(message)),
+  );
+};
+
+run();
