@@ -1,6 +1,6 @@
 {
   "name": "flbot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "main": "lib/package.js",
   "types": "lib/package.d.ts",
@@ -8,7 +8,7 @@
     "dev": "ts-node src/index.ts",
     "test": "ts-node src/test.ts",
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build && cp -r ./src/abi ./lib/abi"
   },
   "keywords": [],
   "author": "",

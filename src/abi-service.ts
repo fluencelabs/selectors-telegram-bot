@@ -7,6 +7,7 @@ import {
   peerIdByte58toContractHex,
   peerIdContractHexToBase58
 } from "./serializers/fluence-peer-and-cid";
+import errors from "./predefined/errors.json";
 
 export const functionSelectors: Map<string, string> = new Map();
 export const eventSelectors: Map<string, string> = new Map();
@@ -53,10 +54,8 @@ const add = (
 }
 
 const loadPredefined = async () => {
-  const errorsData = await fs.promises.readFile(path.join(__dirname, 'predefined', 'errors.json'), 'utf-8');
-  const errors = JSON.parse(errorsData);
   for (const selector of Object.keys(errors)) {
-    const signature = errors[selector]!;
+    const signature = (errors as any)[selector]!;
     const abiItem = parseAbi(['error ' + signature])[0];
     add('error', selector, signature, abiItem);
   }
