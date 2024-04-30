@@ -1,5 +1,5 @@
 {
-  "name": "fluence-bot",
+  "name": "flbot",
   "version": "1.0.0",
   "description": "",
   "main": "lib/package.js",
@@ -27,6 +27,6 @@
     "viem": "^2.8.13"
   },
   "bin": {
-    "fls": "lib/cli.js"
+    "flbot": "lib/cli.js"
   }
 }
