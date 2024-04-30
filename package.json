@@ -1,11 +1,13 @@
 {
-  "name": "debug-cli",
+  "name": "fluence-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/package.js",
+  "types": "lib/package.d.ts",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "test": "ts-node src/test.ts"
+    "test": "ts-node src/test.ts",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -22,5 +24,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2",
     "viem": "^2.8.13"
+  },
+  "bin": {
+    "fls": "lib/cli.js"
   }
 }

@@ -200,7 +200,7 @@ const _composeCidReply = (message: string) => {
   return ""
 }
 
-export const applySelectors = (message: string) => {
+export const processMessage = (message: string) => {
   const derivedAddressReply = _composeDeriveAddressReply(message);
   const composedPeerIdReply = _composePeerIdReply(message);
   const composeCidReply = _composeCidReply(message);

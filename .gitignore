@@ -2,3 +2,4 @@ node_modules
 BOT_TOKEN.ts
 .env
 .idea
+/lib
