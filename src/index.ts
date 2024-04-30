@@ -1,8 +1,7 @@
-import * as dotenv from "dotenv";
 import "colors";
 import { loadFiles } from "./abi-service";
 import { startBot } from "./telegram";
-import {EnvConfig} from "./configs";
+import { EnvConfig } from "./configs";
 
 const main = async () => {
   await loadFiles();
