@@ -200,6 +200,10 @@ const _composeCidReply = (message: string) => {
   return ""
 }
 
+export const stripTags = (text: string) => {
+  return text.replace(/<[^>]*>?/gm, '');
+};
+
 export const processMessage = (message: string) => {
   const derivedAddressReply = _composeDeriveAddressReply(message);
   const composedPeerIdReply = _composePeerIdReply(message);
