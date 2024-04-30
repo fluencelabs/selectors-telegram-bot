@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "ts-node src/index.ts",
     "test": "ts-node src/test.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "keywords": [],
   "author": "",
