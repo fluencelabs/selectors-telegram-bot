@@ -72,7 +72,7 @@ const tupleToComponentsRecursive = (tuple: any): string => {
   return components;
 }
 
-export const loadFiles = async () => {
+export const loadFiles = async (silent = true) => {
   await loadPredefined();
   const dir = path.join(__dirname, 'abi');
   const files = await loadFilesRecursive(dir);
@@ -129,9 +129,11 @@ export const loadFiles = async () => {
 
     // console.log(abiItem, signature, selector);
   }
-  console.log('Loaded', functionSelectors.size, 'functions');
-  console.log('Loaded', eventSelectors.size, 'events');
-  console.log('Loaded', errorSelectors.size, 'errors');
+  if (!silent) {
+    console.log('Loaded', functionSelectors.size, 'functions');
+    console.log('Loaded', eventSelectors.size, 'events');
+    console.log('Loaded', errorSelectors.size, 'errors');
+  }
 }
 
 const _composeDeriveAddressReply = (message: string) => {
@@ -149,6 +151,23 @@ const _composeDeriveAddressReply = (message: string) => {
     composedReplay = "I could generate an address from this private or public key:\n<code>" + addressFromPrivateOrPublicKey + "</code>";
   } catch { }
   return composedReplay;
+}
+
+export const getOnlyFunction = (message: string): string => {
+  if (!message.startsWith('0x')) {
+    message = '0x' + message;
+  }
+  message = message.toLowerCase();
+  const possibleSelector = message.slice(0, 10);
+  if (functionSelectors.has(possibleSelector) && selectorToAbi.has(possibleSelector)) {
+    const inputs = selectorToAbi.get(possibleSelector)!.inputs;
+    const slicedMessage = '0x' + message.slice(10) as `0x${string}`;
+    const data: any[] = decodeAbiParameters(inputs, slicedMessage);
+    const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
+    const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
+    return functionSelectors.get(possibleSelector) + '\n' + prettified + "\n\n";
+  }
+  return "";
 }
 
 const _composeDescriptionByObjectSignatureReply = (message: string) => {

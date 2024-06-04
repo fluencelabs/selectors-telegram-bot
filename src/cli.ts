@@ -11,7 +11,7 @@ if (message.trim() === '') {
 }
 
 const run = async () => {
-  await loadFiles();
+  await loadFiles(true);
   console.log(
     stripTags(processMessage(message)),
   );
