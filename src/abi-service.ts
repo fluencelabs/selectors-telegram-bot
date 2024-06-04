@@ -165,7 +165,11 @@ export const getOnlyFunction = (message: string): string => {
     const data: any[] = decodeAbiParameters(inputs, slicedMessage);
     const stringified = JSON.stringify(data, (_, value) => (typeof (value) === 'bigint') ? value.toString() : value);
     const prettified = JSON.stringify(JSON.parse(stringified), null, 2);
-    return functionSelectors.get(possibleSelector) + '\n' + prettified + "\n\n";
+    if (prettified === "[]") {
+      return functionSelectors.get(possibleSelector)!;
+    } else {
+      return functionSelectors.get(possibleSelector)! + '\n' + prettified;
+    }
   }
   return "";
 }
