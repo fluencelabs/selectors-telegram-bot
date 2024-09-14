@@ -72,7 +72,7 @@ const tupleToComponentsRecursive = (tuple: any): string => {
   return components;
 }
 
-export const loadFiles = async (silent = true) => {
+export const loadFiles = async ({ silent } = { silent: true }) => {
   await loadPredefined();
   const dir = path.join(__dirname, 'abi');
   const files = await loadFilesRecursive(dir);
@@ -89,7 +89,7 @@ export const loadFiles = async (silent = true) => {
       }
       return [];
     }
-    ));
+  ));
   for (const abiItem of abi.flat()) {
     const { type } = abiItem;
     let selector = '';
@@ -99,6 +99,9 @@ export const loadFiles = async (silent = true) => {
       const types = inputs.map((input: any) => {
         if (input.type === 'tuple') {
           return `(${tupleToComponentsRecursive(input)})`;
+        }
+        if (input.type === 'tuple[]') {
+          return `(${tupleToComponentsRecursive(input)})[]`;
         }
         return input.type;
       }).join(',');

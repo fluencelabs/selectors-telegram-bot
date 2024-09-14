@@ -6,6 +6,10 @@ export const startBot = async (token: string) => {
   const bot = new Telegraf(token);
   bot.launch();
 
+  // log bot username
+  const me = await bot.telegram.getMe();
+  console.log("\nBot run at", "@" + me.username);
+
   bot.start((ctx) => {
     ctx.reply(intro, { parse_mode: "HTML", link_preview_options: { is_disabled: true }});
   });
