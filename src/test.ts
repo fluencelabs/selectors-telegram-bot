@@ -5,7 +5,7 @@ const DATA = "0x08c379a000000000000000000000000000000000000000000000000000000000
 
 const main = async () => {
   await loadFiles({ silent: false });
-  console.log(addressesFromMnemonic(""));
+  // console.log(addressesFromMnemonic(""));
 }
 
 main();
