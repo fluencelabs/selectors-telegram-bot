@@ -110,13 +110,29 @@ export const loadFiles = async ({ silent } = { silent: true }) => {
       add('function', selector, signature, abiItem);
     } else if (type === 'event') {
       const { name, inputs } = abiItem;
-      const types = inputs.map((input: any) => input.type).join(',');
+      const types = inputs.map((input: any) => {
+        if (input.type === 'tuple') {
+          return `(${tupleToComponentsRecursive(input)})`;
+        }
+        if (input.type === 'tuple[]') {
+          return `(${tupleToComponentsRecursive(input)})[]`;
+        }
+        return input.type;
+      }).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature));
       add('event', selector, signature, abiItem);
     } else if (type === 'error') {
       const { name, inputs } = abiItem;
-      const types = inputs.map((input: any) => input.type).join(',');
+      const types = inputs.map((input: any) => {
+        if (input.type === 'tuple') {
+          return `(${tupleToComponentsRecursive(input)})`;
+        }
+        if (input.type === 'tuple[]') {
+          return `(${tupleToComponentsRecursive(input)})[]`;
+        }
+        return input.type;
+      }).join(',');
       signature = `${name}(${types})`;
       selector = keccak256(stringToHex(signature)).slice(0, 10);
       add('error', selector, signature, abiItem);
