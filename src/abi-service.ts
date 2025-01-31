@@ -65,7 +65,8 @@ const loadPredefined = async () => {
 const tupleToComponentsRecursive = (tuple: any): string => {
   const components = tuple.components.map((component: any) => {
     if (component.components) {
-      return "(" + tupleToComponentsRecursive(component) + ")";
+      const arraySuffix = (tuple.type === "tuple[]") ? "[]" : "";
+      return "(" + tupleToComponentsRecursive(component) + ")" + arraySuffix;
     }
     return component.type;
   });
