@@ -45,18 +45,20 @@ export function peerIdContractHexToBase58(peerIdHex: string) {
 }
 
 // It mirrors the flow as in Subgraph (Indexer) exists (concat hexes without leading 0x).
-export function cidBase32ToIndexerHex(cid: string): string {
+export function cidBase32ToIndexerHex(cid: string): [string, string] {
   // Changed from ts-client version coz of ipfs-http-client@50.1.2.
   const id = new CID(cid).bytes;
   const prefixes = Buffer.from(id.slice(0, CID_PREFIX_LENGTH)).toString("hex");
   const hash = Buffer.from(id.slice(CID_PREFIX_LENGTH)).toString("hex");
-  const result = `${prefixes}${hash}`
+  const result = `${prefixes}${hash}`;
   // HEX + HEX without leading 0x in both parts.
   if (result.length != INDEXER_CONCATTED_CID_HEX_LENGTH) {
-    throw new Error("[cidBase32ToIndexerHex] Could not parse CID to bytes32.")
+    throw new Error("[cidBase32ToIndexerHex] Could not parse CID to bytes32.");
   }
 
-  return result
+  const formattedResult = `["0x${result.slice(0, 8)}", "0x${result.slice(8)}"]`;
+
+  return [result, formattedResult];
 }
 
 // In Subgraph CID is stored as contacted "hex of prefix" with "hex of hash"

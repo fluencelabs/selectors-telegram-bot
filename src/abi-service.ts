@@ -231,7 +231,8 @@ const _composePeerIdReply = (message: string) => {
 const _composeCidReply = (message: string) => {
   const CID_NOT_SHORTER_THAN = 10;
   try {
-    return "I could format a CID to subgprah hex format from base32:\n<code>" + cidBase32ToIndexerHex(message) + "</code>";
+    const [cidHex, formattedCidHex] = cidBase32ToIndexerHex(message);
+    return "I could format a CID to subgraph hex format from base32:\n<code>" + cidHex + "</code>\n<code>" + formattedCidHex + "</code>";
   } catch { }
   try {
     const cidBase32 = cidIndexerHexToCIDBase32(message)
