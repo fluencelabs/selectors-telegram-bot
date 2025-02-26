@@ -232,7 +232,8 @@ const _composeCidReply = (message: string) => {
   const CID_NOT_SHORTER_THAN = 10;
   try {
     const [cidHex, formattedCidHex] = cidBase32ToIndexerHex(message);
-    return "I could format a CID to subgraph hex format from base32:\n<code>" + cidHex + "</code>\n<code>" + formattedCidHex + "</code>";
+    return "I could format a CID to subgraph hex format from base32:\n<code>" + cidHex +
+      "</code>\n\nSame CID formatted as a CIDV1 structure in cast CLI argument format:\n<code>" + formattedCidHex + "</code>";
   } catch { }
   try {
     const cidBase32 = cidIndexerHexToCIDBase32(message)
